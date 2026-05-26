@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Vendor Billing Software</title>
+
+<!-- Excel Export Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:#f4f6f9;
+    padding:20px;
+}
+
+.container{
+    max-width:1400px;
+    margin:auto;
+}
+
+/* ================= LOGO ================= */
+
+.logo-container{
+    text-align:center;
+    margin-bottom:15px;
+}
+
+.logo-container img{
+    width:180px;
+    border-radius:10px;
+}
+
+/* ================= TITLE ================= */
+
+h1{
+    text-align:center;
+    color:#0d47a1;
+    margin-bottom:30px;
+}
+
+/* ================= SECTION ================= */
+
+.section{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    margin-bottom:30px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+.section h2{
+    color:#1565c0;
+    margin-bottom:15px;
+}
+
+/* ================= FORM ================= */
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:15px;
+    margin-bottom:15px;
+}
+
+input, select{
+    width:100%;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:5px;
+    font-size:14px;
+}
+
+button{
+    background:#1565c0;
+    color:white;
+    border:none;
+    padding:10px 18px;
+    border-radius:5px;
+    cursor:pointer;
+    margin-right:10px;
+    margin-top:10px;
+    font-size:14px;
+}
+
+button:hover{
+    background:#0d47a1;
+}
+
+/* ================= TABLE ================= */
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+table th, table td{
+    border:1px solid #ddd;
+    padding:10px;
+    text-align:center;
+}
+
+table th{
+    background:#1565c0;
+    color:white;
+}
+
+.total-box{
+    margin-top:15px;
+    text-align:right;
+    font-size:18px;
+    font-weight:bold;
+    color:#0d47a1;
+}
+
+.footer{
+    text-align:center;
+    margin-top:20px;
+    color:#555;
+}
+
+@media(max-width:768px){
+
+    table{
+        font-size:12px;
+    }
+
+    button{
+        width:100%;
+        margin-bottom:10px;
+    }
+
+    .logo-container img{
+        width:120px;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- ================= LOGO ================= -->
+
+<div class="logo-container">
+
+<img src="img/1.png">
+
+</div>
+
+<h1>vendor Billing Software</h1>
+
+<!-- ================= BILL ENTRY ================= -->
+
+<div class="section">
+
+<h2>Vendor</h2>
+
+<div class="form-grid">
+
+<select id="entryType">
+<option value="">Select Type</option>
+<option>Vendor</option>
+</select>
+
+
+<input type="text" id="billNo" placeholder="Bill Number">
+
+<input type="date" id="billDate">
+
+<select id="paymentMode">
+<option value="">Mode of Payment</option>
+<option>Cash</option>
+<option>UPI</option>
+<option>Bank Transfer</option>
+<option>Cheque</option>
+</select>
+
+<input type="number" id="billAmount" placeholder="Bill Amount">
+
+<input type="number" id="gstAmount" placeholder="GST Amount">
+
+</div>
+
+<button onclick="addEntry()">Add Entry</button>
+
+<button onclick="exportExcel()">Export Excel</button>
+
+<button onclick="clearAllData()">Clear All Data</button>
+
+<table id="mainTable">
+
+<thead>
+
+<tr>
+<th>Type</th>
+<th>Name</th>
+<th>Bill No</th>
+<th>Date</th>
+<th>Payment Mode</th>
+<th>Bill Amount</th>
+<th>GST Amount</th>
+<th>Total Amount</th>
+</tr>
+
+</thead>
+
+<tbody></tbody>
+
+</table>
+
+<div class="total-box">
+Grand Total : ₹ <span id="grandTotal">0.00</span>
+</div>
+
+</div>
+
+<!-- ================= DEPOSIT ENTRY ================= -->
+
+<div class="section">
+
+<h2>Deposit Amount Entry</h2>
+
+<div class="form-grid">
+
+<select id="depositType">
+<option value="">Select Type</option>
+<option>Vendor</option>
+<option>Customer</option>
+</select>
+
+<input type="text" id="depositParty" placeholder="Vendor / Customer Name">
+
+<input type="text" id="depositRef" placeholder="Reference Bill No">
+
+<input type="date" id="depositDate">
+
+<select id="depositMode">
+<option value="">Mode of Payment</option>
+<option>Cash</option>
+<option>UPI</option>
+<option>Bank Transfer</option>
+<option>Cheque</option>
+</select>
+
+<input type="number" id="depositAmount" placeholder="Deposit Amount">
+
+</div>
+
+<button onclick="addDeposit()">Add Deposit</button>
+
+<button onclick="exportDepositExcel()">Export Deposit Excel</button>
+
+<table id="depositTable">
+
+<thead>
+
+<tr>
+<th>Type</th>
+<th>Name</th>
+<th>Reference Bill No</th>
+<th>Date</th>
+<th>Payment Mode</th>
+<th>Deposit Amount</th>
+</tr>
+
+</thead>
+
+<tbody></tbody>
+
+</table>
+
+<div class="total-box">
+Deposit Total : ₹ <span id="depositTotal">0.00</span>
+</div>
+
+</div>
+
+<div class="footer">
+© 2026 Ayyappa Automobiles
+</div>
+
+</div>
+
+<script>
+
+/* ================= LOCAL STORAGE KEYS ================= */
+
+const BILL_KEY = "ayyappa_bill_data";
+const DEPOSIT_KEY = "ayyappa_deposit_data";
+
+/* ================= TOTAL VARIABLES ================= */
+
+let grandTotal = 0;
+let depositGrandTotal = 0;
+
+/* ================= PAGE LOAD ================= */
+
+window.onload = function(){
+
+    loadBillData();
+    loadDepositData();
+
+}
+
+/* ================= ADD BILL ENTRY ================= */
+
+function addEntry(){
+
+    let type =
+    document.getElementById("entryType").value;
+
+    let partyName =
+    document.getElementById("partyName").value;
+
+    let billNo =
+    document.getElementById("billNo").value;
+
+    let billDate =
+    document.getElementById("billDate").value;
+
+    let paymentMode =
+    document.getElementById("paymentMode").value;
+
+    let billAmount =
+    parseFloat(document.getElementById("billAmount").value) || 0;
+
+    let gstAmount =
+    parseFloat(document.getElementById("gstAmount").value) || 0;
+
+    let totalAmount = billAmount + gstAmount;
+
+    let data = {
+        type,
+        partyName,
+        billNo,
+        billDate,
+        paymentMode,
+        billAmount,
+        gstAmount,
+        totalAmount
+    };
+
+    saveBillData(data);
+
+    addBillRow(data);
+
+    clearEntryForm();
+}
+
+/* ================= SAVE BILL DATA ================= */
+
+function saveBillData(data){
+
+    let oldData =
+    JSON.parse(localStorage.getItem(BILL_KEY)) || [];
+
+    oldData.push(data);
+
+    localStorage.setItem(BILL_KEY,
+    JSON.stringify(oldData));
+}
+
+/* ================= LOAD BILL DATA ================= */
+
+function loadBillData(){
+
+    let data =
+    JSON.parse(localStorage.getItem(BILL_KEY)) || [];
+
+    data.forEach(item => {
+        addBillRow(item);
+    });
+
+}
+
+/* ================= ADD BILL ROW ================= */
+
+function addBillRow(data){
+
+    let table =
+    document.querySelector("#mainTable tbody");
+
+    let row = table.insertRow();
+
+    row.innerHTML = `
+        <td>${data.type}</td>
+        <td>${data.partyName}</td>
+        <td>${data.billNo}</td>
+        <td>${data.billDate}</td>
+        <td>${data.paymentMode}</td>
+        <td>${Number(data.billAmount).toFixed(2)}</td>
+        <td>${Number(data.gstAmount).toFixed(2)}</td>
+        <td>${Number(data.totalAmount).toFixed(2)}</td>
+    `;
+
+    grandTotal += Number(data.totalAmount);
+
+    document.getElementById("grandTotal").innerText =
+    grandTotal.toFixed(2);
+}
+
+/* ================= CLEAR BILL FORM ================= */
+
+function clearEntryForm(){
+
+    document.getElementById("entryType").value = "";
+    document.getElementById("partyName").value = "";
+    document.getElementById("billNo").value = "";
+    document.getElementById("billDate").value = "";
+    document.getElementById("paymentMode").value = "";
+    document.getElementById("billAmount").value = "";
+    document.getElementById("gstAmount").value = "";
+}
+
+/* ================= ADD DEPOSIT ================= */
+
+function addDeposit(){
+
+    let type =
+    document.getElementById("depositType").value;
+
+    let party =
+    document.getElementById("depositParty").value;
+
+    let ref =
+    document.getElementById("depositRef").value;
+
+    let date =
+    document.getElementById("depositDate").value;
+
+    let mode =
+    document.getElementById("depositMode").value;
+
+    let amount =
+    parseFloat(document.getElementById("depositAmount").value) || 0;
+
+    let data = {
+        type,
+        party,
+        ref,
+        date,
+        mode,
+        amount
+    };
+
+    saveDepositData(data);
+
+    addDepositRow(data);
+
+    clearDepositForm();
+}
+
+/* ================= SAVE DEPOSIT DATA ================= */
+
+function saveDepositData(data){
+
+    let oldData =
+    JSON.parse(localStorage.getItem(DEPOSIT_KEY)) || [];
+
+    oldData.push(data);
+
+    localStorage.setItem(DEPOSIT_KEY,
+    JSON.stringify(oldData));
+}
+
+/* ================= LOAD DEPOSIT DATA ================= */
+
+function loadDepositData(){
+
+    let data =
+    JSON.parse(localStorage.getItem(DEPOSIT_KEY)) || [];
+
+    data.forEach(item => {
+        addDepositRow(item);
+    });
+
+}
+
+/* ================= ADD DEPOSIT ROW ================= */
+
+function addDepositRow(data){
+
+    let table =
+    document.querySelector("#depositTable tbody");
+
+    let row = table.insertRow();
+
+    row.innerHTML = `
+        <td>${data.type}</td>
+        <td>${data.party}</td>
+        <td>${data.ref}</td>
+        <td>${data.date}</td>
+        <td>${data.mode}</td>
+        <td>${Number(data.amount).toFixed(2)}</td>
+    `;
+
+    depositGrandTotal += Number(data.amount);
+
+    document.getElementById("depositTotal").innerText =
+    depositGrandTotal.toFixed(2);
+}
+
+/* ================= CLEAR DEPOSIT FORM ================= */
+
+function clearDepositForm(){
+
+    document.getElementById("depositType").value = "";
+    document.getElementById("depositParty").value = "";
+    document.getElementById("depositRef").value = "";
+    document.getElementById("depositDate").value = "";
+    document.getElementById("depositMode").value = "";
+    document.getElementById("depositAmount").value = "";
+}
+
+/* ================= EXPORT BILL EXCEL ================= */
+
+function exportExcel(){
+
+    let table =
+    document.getElementById("mainTable");
+
+    let workbook =
+    XLSX.utils.table_to_book(table, {
+        sheet:"Bills"
+    });
+
+    XLSX.writeFile(workbook,
+    "Vendor_Customer_Bills.xlsx");
+}
+
+/* ================= EXPORT DEPOSIT EXCEL ================= */
+
+function exportDepositExcel(){
+
+    let table =
+    document.getElementById("depositTable");
+
+    let workbook =
+    XLSX.utils.table_to_book(table, {
+        sheet:"Deposits"
+    });
+
+    XLSX.writeFile(workbook,
+    "Deposit_Entries.xlsx");
+}
+
+/* ================= CLEAR ALL DATA ================= */
+
+function clearAllData(){
+
+    if(confirm("Delete all saved data?")){
+
+        localStorage.removeItem(BILL_KEY);
+        localStorage.removeItem(DEPOSIT_KEY);
+
+        location.reload();
+    }
+}
+
+</script>
+
+</body>
+</html>
